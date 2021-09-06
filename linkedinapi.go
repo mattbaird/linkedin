@@ -83,7 +83,6 @@ func (lic *LinkedInClient) Authenticate() error {
 		return err
 	}
 	lic.logger.Printf("token:%v", lic.token)
-
 	return nil
 }
 
