@@ -72,7 +72,7 @@ func (lic *LinkedInClient) Authenticate() error {
 		return err
 	}
 	if resp.StatusCode >= 300 {
-		return fmt.Errorf("error authenticating:%v", resp.Status)
+		return fmt.Errorf("error authenticating LinkedIn API Client:%v", resp.Status)
 	}
 	lic.logger.Printf("no error no bad status code")
 	defer resp.Body.Close()
