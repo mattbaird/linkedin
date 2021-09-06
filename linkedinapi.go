@@ -7,6 +7,8 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
+
+	"github.com/sirupsen/logrus"
 )
 
 const REST_CREATE_AD_ACCOUNT = "https://api.linkedin.com/v2/adAccountsV2"                                                                                                                                                                                                                                                                                                                                                                  // POST
@@ -29,6 +31,7 @@ type LinkedInClient struct {
 	clientSecret      string
 	client            http.Client
 	token             Token
+	logger            *logrus.Logger
 }
 
 func NewClient(clientCredentials, clientSecret string) (LinkedInClient, error) {
@@ -39,12 +42,24 @@ func NewClient(clientCredentials, clientSecret string) (LinkedInClient, error) {
 	if len(strings.TrimSpace(clientCredentials)) == 0 {
 		return LinkedInClient{}, errors.New("missing client credentials")
 	}
-	return LinkedInClient{clientCredentials: clientCredentials, clientSecret: clientSecret}, nil
+	retval := LinkedInClient{clientCredentials: clientCredentials, clientSecret: clientSecret}
+	// set default logger
+	logger := logrus.New()
+	logger.SetLevel(logrus.DebugLevel)
+	logger.SetFormatter(&logrus.TextFormatter{})
+	retval.SetLogger(logger)
+	return retval, nil
+}
+
+// SetLogger associates a logrus instance to the linkedIn api client
+func (lic *LinkedInClient) SetLogger(l *logrus.Logger) {
+	lic.logger = l
 }
 
 // Authenticate generates an access token, issue a HTTP POST against accessToken
 //with your Client ID and Client Secret values
 func (lic *LinkedInClient) Authenticate() error {
+	lic.logger.Debugf("LinkedInClient Authenticate called")
 	formValues := fmt.Sprintf("grant_type=client_credentials&client_id=%s&client_secret=%s", lic.clientCredentials, lic.clientSecret)
 	req, err := http.NewRequest(POST, REST_GENERATE_ACCESS_TOKEN, strings.NewReader(formValues))
 	if err != nil {
@@ -67,5 +82,6 @@ func (lic *LinkedInClient) Authenticate() error {
 }
 
 func (lic *LinkedInClient) GetTargetingFacets() TargetingFacetsResponse {
+	lic.logger.Debugf("LinkedInClient GetTargetingFacets called")
 	return TargetingFacetsResponse{}
 }
