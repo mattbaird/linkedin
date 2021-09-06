@@ -34,6 +34,7 @@ type LinkedInClient struct {
 	logger            *logrus.Logger
 }
 
+// NewClient creates a new Linkedin API Client
 func NewClient(clientCredentials, clientSecret string) (LinkedInClient, error) {
 	if len(strings.TrimSpace(clientSecret)) == 0 {
 		return LinkedInClient{}, errors.New("missing client credentials")
