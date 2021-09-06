@@ -57,7 +57,7 @@ func (lic *LinkedInClient) SetLogger(l *logrus.Logger) {
 }
 
 // Authenticate generates an access token, issue a HTTP POST against accessToken
-//with your Client ID and Client Secret values
+// with your Client ID and Client Secret values
 func (lic *LinkedInClient) Authenticate() error {
 	lic.logger.Debugf("LinkedInClient Authenticate called")
 	formValues := fmt.Sprintf("grant_type=client_credentials&client_id=%s&client_secret=%s", lic.clientCredentials, lic.clientSecret)
@@ -70,6 +70,10 @@ func (lic *LinkedInClient) Authenticate() error {
 	if err != nil {
 		return err
 	}
+	if resp.StatusCode >= 300 {
+		return errors.New("error authenticating")
+	}
+	lic.logger.Printf("no error no bad status code")
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
@@ -78,6 +82,8 @@ func (lic *LinkedInClient) Authenticate() error {
 	if err := json.Unmarshal(body, &lic.token); err != nil {
 		return err
 	}
+	lic.logger.Printf("token:%v", lic.token)
+
 	return nil
 }
 
