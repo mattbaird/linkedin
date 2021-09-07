@@ -56,7 +56,7 @@ func newAdAccountRequest(currency string, name string, notifiedOnCampaignOptimiz
 	if len(strings.TrimSpace(name)) == 0 {
 		return CreateAdAccountRequest{}, fmt.Errorf("name was empty")
 	}
-	if accountType != "BUSINESS" || accountType != "ENTERPRISE" {
+	if !(accountType == "BUSINESS" || accountType == "ENTERPRISE") {
 		return CreateAdAccountRequest{}, fmt.Errorf("accountType must be one of BUSINESS or ENTERPRISE")
 	}
 	actualCurrency := "USD"
