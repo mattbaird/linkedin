@@ -1,5 +1,10 @@
 package linkedin
 
+import (
+	"fmt"
+	"strings"
+)
+
 type Token struct {
 	AccessToken string `json:"access_token"`
 	ExpiresIn   string `json:"expires_in"`
@@ -16,6 +21,60 @@ type CreateAdAccountRequest struct {
 	Type                           string `json:"type"`
 }
 
+type FetchAdAccountResponse struct {
+	Test              bool `json:"test"`
+	ChangeAuditStamps struct {
+		Created struct {
+			Actor string `json:"actor"`
+			Time  int64  `json:"time"`
+		} `json:"created"`
+		LastModified struct {
+			Actor string `json:"actor"`
+			Time  int64  `json:"time"`
+		} `json:"lastModified"`
+	} `json:"changeAuditStamps"`
+	Currency                       string   `json:"currency"`
+	ID                             int      `json:"id"`
+	Name                           string   `json:"name"`
+	NotifiedOnCampaignOptimization bool     `json:"notifiedOnCampaignOptimization"`
+	NotifiedOnCreativeApproval     bool     `json:"notifiedOnCreativeApproval"`
+	NotifiedOnCreativeRejection    bool     `json:"notifiedOnCreativeRejection"`
+	NotifiedOnEndOfCampaign        bool     `json:"notifiedOnEndOfCampaign"`
+	Reference                      string   `json:"reference"`
+	ServingStatuses                []string `json:"servingStatuses"`
+	Status                         string   `json:"status"`
+	Type                           string   `json:"type"`
+	Version                        struct {
+		VersionTag string `json:"versionTag"`
+	} `json:"version"`
+}
+
+// we only support creating organization ad accounts (reference urn)
+func newAdAccountRequest(currency string, name string, notifiedOnCampaignOptimization bool,
+	notifiedOnCreativeApproval bool, notifiedOnCreativeRejection bool, notifiedOnEndOfCampaign bool,
+	orgId int, accountType string) (CreateAdAccountRequest, error) {
+	if len(strings.TrimSpace(name)) == 0 {
+		return CreateAdAccountRequest{}, fmt.Errorf("name was empty")
+	}
+	if accountType != "BUSINESS" || accountType != "ENTERPRISE" {
+		return CreateAdAccountRequest{}, fmt.Errorf("accountType must be one of BUSINESS or ENTERPRISE")
+	}
+	actualCurrency := "USD"
+	if len(strings.TrimSpace(currency)) != 0 {
+		actualCurrency = currency
+	}
+	return CreateAdAccountRequest{
+		Currency:                       actualCurrency,
+		Name:                           name,
+		NotifiedOnCampaignOptimization: notifiedOnCampaignOptimization,
+		NotifiedOnCreativeApproval:     notifiedOnCreativeApproval,
+		NotifiedOnCreativeRejection:    notifiedOnCreativeRejection,
+		NotifiedOnEndOfCampaign:        notifiedOnEndOfCampaign,
+		Reference:                      fmt.Sprintf("urn:li:organization:%v", orgId),
+		Type:                           accountType,
+	}, nil
+}
+
 type CreateCampaignGroupResponse struct {
 	Account     string `json:"account"`
 	Name        string `json:"name"`
@@ -28,6 +87,31 @@ type CreateCampaignGroupResponse struct {
 		Amount       string `json:"amount"`
 		CurrencyCode string `json:"currencyCode"`
 	} `json:"totalBudget"`
+}
+
+type GetCampaignGroupResponse struct {
+	Account           string `json:"account"`
+	Backfilled        bool   `json:"backfilled"`
+	ChangeAuditStamps struct {
+		Created struct {
+			Actor string `json:"actor"`
+			Time  int64  `json:"time"`
+		} `json:"created"`
+		LastModified struct {
+			Actor string `json:"actor"`
+			Time  int64  `json:"time"`
+		} `json:"lastModified"`
+	} `json:"changeAuditStamps"`
+	ID          int    `json:"id"`
+	Name        string `json:"name"`
+	RunSchedule struct {
+		End   int `json:"end"`
+		Start int `json:"start"`
+	} `json:"runSchedule"`
+	Test                 bool     `json:"test"`
+	ServingStatuses      []string `json:"servingStatuses"`
+	AllowedCampaignTypes []string `json:"allowedCampaignTypes"`
+	Status               string   `json:"status"`
 }
 
 type TargetingFacetsResponse struct {
@@ -107,7 +191,9 @@ type AdBudgetPricingResponse struct {
 	} `json:"paging"`
 }
 
-type CreateCampaignResponse struct {
+type Campaign struct {
+}
+type CreateCampaignRequest struct {
 	Account                  string `json:"account"`
 	AudienceExpansionEnabled bool   `json:"audienceExpansionEnabled"`
 	CostType                 string `json:"costType"`
@@ -160,4 +246,122 @@ type CreateAdCreativeResponse struct {
 			} `json:"com.linkedin.ads.TextAdCreativeVariables"`
 		} `json:"data"`
 	} `json:"variables"`
+}
+
+type AdAnalyticsResponse struct {
+	Elements []struct {
+		ChargeableClicks int `json:"chargeableClicks"`
+		DateRange        struct {
+			End struct {
+				Day   int `json:"day"`
+				Month int `json:"month"`
+				Year  int `json:"year"`
+			} `json:"end"`
+			Start struct {
+				Day   int `json:"day"`
+				Month int `json:"month"`
+				Year  int `json:"year"`
+			} `json:"start"`
+		} `json:"dateRange"`
+		Impressions         int    `json:"impressions"`
+		NonchargeableClicks int    `json:"nonchargeableClicks"`
+		Pivot               string `json:"pivot"`
+		Spend               struct {
+			Amount       string `json:"amount"`
+			CurrencyCode string `json:"currencyCode"`
+		} `json:"spend"`
+	} `json:"elements"`
+	Paging struct {
+		Count int `json:"count"`
+		Start int `json:"start"`
+	} `json:"paging"`
+}
+
+type GetConversionsResponse struct {
+	PostClickAttributionWindowSize   int    `json:"postClickAttributionWindowSize"`
+	ViewThroughAttributionWindowSize int    `json:"viewThroughAttributionWindowSize"`
+	Created                          int64  `json:"created"`
+	ImagePixelTag                    string `json:"imagePixelTag"`
+	Type                             string `json:"type"`
+	Enabled                          bool   `json:"enabled"`
+	AssociatedCampaigns              []struct {
+		Campaign     string `json:"campaign"`
+		AssociatedAt int64  `json:"associatedAt"`
+		Conversion   string `json:"conversion"`
+	} `json:"associatedCampaigns"`
+	Campaigns              []string `json:"campaigns"`
+	URLMatchRuleExpression [][]struct {
+		MatchType  string `json:"matchType"`
+		MatchValue string `json:"matchValue"`
+	} `json:"urlMatchRuleExpression"`
+	Name            string        `json:"name"`
+	LastModified    int64         `json:"lastModified"`
+	ID              int           `json:"id"`
+	AttributionType string        `json:"attributionType"`
+	URLRules        []interface{} `json:"urlRules"`
+	Account         string        `json:"account"`
+}
+
+type BatchGetConversionsResponse struct {
+	Statuses struct {
+	} `json:"statuses"`
+	Results struct {
+		Num104004 struct {
+			PostClickAttributionWindowSize   int    `json:"postClickAttributionWindowSize"`
+			Created                          int64  `json:"created"`
+			ViewThroughAttributionWindowSize int    `json:"viewThroughAttributionWindowSize"`
+			ImagePixelTag                    string `json:"imagePixelTag"`
+			Type                             string `json:"type"`
+			Enabled                          bool   `json:"enabled"`
+			AssociatedCampaigns              []struct {
+				Campaign     string `json:"campaign"`
+				AssociatedAt int64  `json:"associatedAt"`
+				Conversion   string `json:"conversion"`
+			} `json:"associatedCampaigns"`
+			Campaigns       []string      `json:"campaigns"`
+			Name            string        `json:"name"`
+			LastModified    int64         `json:"lastModified"`
+			ID              int           `json:"id"`
+			AttributionType string        `json:"attributionType"`
+			URLRules        []interface{} `json:"urlRules"`
+			Value           struct {
+				Amount       string `json:"amount"`
+				CurrencyCode string `json:"currencyCode"`
+			} `json:"value"`
+			Account string `json:"account"`
+		} `json:"104004"`
+		Num104012 struct {
+			PostClickAttributionWindowSize   int    `json:"postClickAttributionWindowSize"`
+			Created                          int64  `json:"created"`
+			ViewThroughAttributionWindowSize int    `json:"viewThroughAttributionWindowSize"`
+			ImagePixelTag                    string `json:"imagePixelTag"`
+			Type                             string `json:"type"`
+			Enabled                          bool   `json:"enabled"`
+			AssociatedCampaigns              []struct {
+				Campaign     string `json:"campaign"`
+				AssociatedAt int64  `json:"associatedAt"`
+				Conversion   string `json:"conversion"`
+			} `json:"associatedCampaigns"`
+			Campaigns              []string `json:"campaigns"`
+			Name                   string   `json:"name"`
+			URLMatchRuleExpression [][]struct {
+				MatchType  string `json:"matchType"`
+				MatchValue string `json:"matchValue"`
+			} `json:"urlMatchRuleExpression"`
+			LastModified    int64  `json:"lastModified"`
+			ID              int    `json:"id"`
+			AttributionType string `json:"attributionType"`
+			URLRules        []struct {
+				MatchValue string `json:"matchValue"`
+				Type       string `json:"type"`
+			} `json:"urlRules"`
+			Value struct {
+				Amount       string `json:"amount"`
+				CurrencyCode string `json:"currencyCode"`
+			} `json:"value"`
+			Account string `json:"account"`
+		} `json:"104012"`
+	} `json:"results"`
+	Errors struct {
+	} `json:"errors"`
 }
