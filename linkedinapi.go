@@ -41,6 +41,13 @@ type LinkedInClient struct {
 }
 
 // NewClient creates a new Linkedin API Client
+func NewClientFromToken(token Token) (LinkedInClient, error) {
+	c, err := NewClient("fake", "fake")
+	c.token = token
+	return c, err
+}
+
+// NewClient creates a new Linkedin API Client
 func NewClient(clientCredentials, clientSecret string) (LinkedInClient, error) {
 	var (
 		conn *tls.Conn

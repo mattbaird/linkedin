@@ -365,3 +365,63 @@ type BatchGetConversionsResponse struct {
 	Errors struct {
 	} `json:"errors"`
 }
+
+type FollowerStatistics struct {
+	Paging struct {
+		Start int           `json:"start"`
+		Count int           `json:"count"`
+		Links []interface{} `json:"links"`
+	} `json:"paging"`
+	Elements []struct {
+		Followercountsbyassociationtype []struct {
+			Followercounts struct {
+				Organicfollowercount int `json:"organicFollowerCount"`
+				Paidfollowercount    int `json:"paidFollowerCount"`
+			} `json:"followerCounts"`
+			Associationtype string `json:"associationType,omitempty"`
+		} `json:"followerCountsByAssociationType"`
+		Followercountsbyregion []struct {
+			Region         string `json:"region"`
+			Followercounts struct {
+				Organicfollowercount int `json:"organicFollowerCount"`
+				Paidfollowercount    int `json:"paidFollowerCount"`
+			} `json:"followerCounts"`
+		} `json:"followerCountsByRegion"`
+		Followercountsbyseniority []struct {
+			Followercounts struct {
+				Organicfollowercount int `json:"organicFollowerCount"`
+				Paidfollowercount    int `json:"paidFollowerCount"`
+			} `json:"followerCounts"`
+			Seniority string `json:"seniority"`
+		} `json:"followerCountsBySeniority"`
+		Followercountsbyindustry []struct {
+			Followercounts struct {
+				Organicfollowercount int `json:"organicFollowerCount"`
+				Paidfollowercount    int `json:"paidFollowerCount"`
+			} `json:"followerCounts"`
+			Industry string `json:"industry"`
+		} `json:"followerCountsByIndustry"`
+		Followercountsbyfunction []struct {
+			Followercounts struct {
+				Organicfollowercount int `json:"organicFollowerCount"`
+				Paidfollowercount    int `json:"paidFollowerCount"`
+			} `json:"followerCounts"`
+			Function string `json:"function"`
+		} `json:"followerCountsByFunction"`
+		Followercountsbystaffcountrange []struct {
+			Followercounts struct {
+				Organicfollowercount int `json:"organicFollowerCount"`
+				Paidfollowercount    int `json:"paidFollowerCount"`
+			} `json:"followerCounts"`
+			Staffcountrange string `json:"staffCountRange"`
+		} `json:"followerCountsByStaffCountRange"`
+		Followercountsbycountry []struct {
+			Followercounts struct {
+				Organicfollowercount int `json:"organicFollowerCount"`
+				Paidfollowercount    int `json:"paidFollowerCount"`
+			} `json:"followerCounts"`
+			Country string `json:"country"`
+		} `json:"followerCountsByCountry"`
+		Organizationalentity string `json:"organizationalEntity"`
+	} `json:"elements"`
+}
