@@ -425,3 +425,66 @@ type FollowerStatistics struct {
 		Organizationalentity string `json:"organizationalEntity"`
 	} `json:"elements"`
 }
+
+type Organization struct {
+	Elements []struct {
+		Urn              string        `json:"$URN"`
+		Alternativenames []interface{} `json:"alternativeNames"`
+		Autocreated      bool          `json:"autoCreated"`
+		Defaultlocale    struct {
+			Country  string `json:"country"`
+			Language string `json:"language"`
+		} `json:"defaultLocale"`
+		Description struct {
+			Localized struct {
+				EnUs string `json:"en_US"`
+			} `json:"localized"`
+			Preferredlocale struct {
+				Country  string `json:"country"`
+				Language string `json:"language"`
+			} `json:"preferredLocale"`
+		} `json:"description"`
+		ID                   int           `json:"id"`
+		Industries           []string      `json:"industries"`
+		Localizeddescription string        `json:"localizedDescription"`
+		Localizedname        string        `json:"localizedName"`
+		Localizedspecialties []interface{} `json:"localizedSpecialties"`
+		Name                 struct {
+			Localized struct {
+				EnUs string `json:"en_US"`
+			} `json:"localized"`
+			Preferredlocale struct {
+				Country  string `json:"country"`
+				Language string `json:"language"`
+			} `json:"preferredLocale"`
+		} `json:"name"`
+		Specialties []interface{} `json:"specialties"`
+		Vanityname  string        `json:"vanityName"`
+		Versiontag  string        `json:"versionTag"`
+		Website     struct {
+			Localized struct {
+				EnUs string `json:"en_US"`
+			} `json:"localized"`
+			Preferredlocale struct {
+				Country  string `json:"country"`
+				Language string `json:"language"`
+			} `json:"preferredLocale"`
+		} `json:"website"`
+	} `json:"elements"`
+	Paging struct {
+		Count int           `json:"count"`
+		Links []interface{} `json:"links"`
+		Start int           `json:"start"`
+		Total int           `json:"total"`
+	} `json:"paging"`
+}
+
+type ResolvedURN struct {
+	Urn  string `json:"$URN"`
+	Name struct {
+		Localized struct {
+			EnUs string `json:"en_US"`
+		} `json:"localized"`
+	} `json:"name"`
+	ID int `json:"id"`
+}
