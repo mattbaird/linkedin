@@ -31,7 +31,7 @@ type LinkedInClient struct {
 }
 
 // NewClient creates a new Linkedin API Client
-func NewClien(client *http.Client) (LinkedInClient, error) {
+func NewClient(client *http.Client) LinkedInClient {
 	retval := LinkedInClient{}
 	// set default logger
 	logger := logrus.New()
@@ -39,7 +39,7 @@ func NewClien(client *http.Client) (LinkedInClient, error) {
 	logger.SetFormatter(&logrus.TextFormatter{})
 	retval.SetLogger(logger)
 	retval.client = client
-	return retval, nil
+	return retval
 }
 
 // SetLogger associates a logrus instance to the linkedIn api client
