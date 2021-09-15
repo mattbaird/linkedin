@@ -1,16 +1,10 @@
 package linkedin
 
 import (
-	"crypto/tls"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io/ioutil"
-	"net"
 	"net/http"
-	"strconv"
-	"strings"
-	"time"
 
 	"github.com/sirupsen/logrus"
 )
@@ -32,51 +26,19 @@ const POST = "POST"
 const GET = "GET"
 
 type LinkedInClient struct {
-	clientCredentials string
-	clientSecret      string
-	client            *http.Client
-	token             Token
-	tokenAcquiredAt   int64
-	logger            *logrus.Logger
+	client *http.Client
+	logger *logrus.Logger
 }
 
 // NewClient creates a new Linkedin API Client
-func NewClientFromToken(token Token) (LinkedInClient, error) {
-	c, err := NewClient("fake", "fake")
-	c.token = token
-	return c, err
-}
-
-// NewClient creates a new Linkedin API Client
-func NewClient(clientCredentials, clientSecret string) (LinkedInClient, error) {
-	var (
-		conn *tls.Conn
-		err  error
-	)
-	if len(strings.TrimSpace(clientSecret)) == 0 {
-		return LinkedInClient{}, errors.New("missing client credentials")
-	}
-
-	if len(strings.TrimSpace(clientCredentials)) == 0 {
-		return LinkedInClient{}, errors.New("missing client credentials")
-	}
-	retval := LinkedInClient{clientCredentials: clientCredentials, clientSecret: clientSecret}
+func NewClien(client *http.Client) (LinkedInClient, error) {
+	retval := LinkedInClient{}
 	// set default logger
 	logger := logrus.New()
 	logger.SetLevel(logrus.DebugLevel)
 	logger.SetFormatter(&logrus.TextFormatter{})
 	retval.SetLogger(logger)
-	tlsConfig := http.DefaultTransport.(*http.Transport).TLSClientConfig
-
-	retval.client = &http.Client{
-		Transport: &http.Transport{
-			DialTLS: func(network, addr string) (net.Conn, error) {
-				conn, err = tls.Dial(network, addr, tlsConfig)
-				return conn, err
-			},
-		},
-	}
-
+	retval.client = client
 	return retval, nil
 }
 
@@ -85,44 +47,10 @@ func (lic *LinkedInClient) SetLogger(l *logrus.Logger) {
 	lic.logger = l
 }
 
-// Authenticate generates an access token, issue a HTTP POST against accessToken
-// with your Client ID and Client Secret values
-func (lic *LinkedInClient) Authenticate() error {
-	lic.logger.Debugf("LinkedInClient Authenticate called")
-	formValues := fmt.Sprintf("grant_type=client_credentials&client_id=%s&client_secret=%s", lic.clientCredentials, lic.clientSecret)
-	req, err := http.NewRequest(POST, REST_GENERATE_ACCESS_TOKEN, strings.NewReader(formValues))
-	if err != nil {
-		return err
-	}
-	req.Header.Set(HEADER_CONTENT_TYPE, "application/x-www-form-urlencoded")
-	resp, err := lic.client.Do(req)
-	if err != nil {
-		return err
-	}
-	if resp.StatusCode >= 300 {
-		return fmt.Errorf("error authenticating LinkedIn:%v", resp.Status)
-	}
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return err
-	}
-	if err := json.Unmarshal(body, &lic.token); err != nil {
-		return err
-	}
-	lic.logger.Printf("token:%v", lic.token)
-	lic.tokenAcquiredAt = time.Now().UnixMilli()
-	return nil
-}
-
 // GetTargetingFacets calls the LinkedIn API
 func (lic *LinkedInClient) GetTargetingFacets() (TargetingFacetsResponse, error) {
 	lic.logger.Debugf("LinkedInClient GetTargetingFacets called")
 	retval := TargetingFacetsResponse{}
-	err := lic.checkAndRefresh()
-	if err != nil {
-		return retval, err
-	}
 	req, err := http.NewRequest(POST, REST_TARGETING_FACETS, nil)
 	if err != nil {
 		return retval, err
@@ -132,10 +60,6 @@ func (lic *LinkedInClient) GetTargetingFacets() (TargetingFacetsResponse, error)
 }
 
 func (lic *LinkedInClient) callRestAPI(req *http.Request, target interface{}) (*http.Response, error) {
-	req.Header.Set(HEADER_AUTHORIZATION, fmt.Sprintf("Bearer %s", lic.token.AccessToken))
-	if len(req.Header.Get(HEADER_CONTENT_TYPE)) == 0 {
-		req.Header.Set(HEADER_CONTENT_TYPE, APPLICATION_JSON)
-	}
 	resp, err := lic.client.Do(req)
 	if err != nil {
 		return nil, err
@@ -152,25 +76,4 @@ func (lic *LinkedInClient) callRestAPI(req *http.Request, target interface{}) (*
 		return nil, err
 	}
 	return resp, nil
-}
-
-func (lic *LinkedInClient) shouldRefresh() bool {
-	expiresInInt, err := strconv.ParseInt(lic.token.ExpiresIn, 10, 64)
-	if err != nil {
-		lic.logger.Printf("error converting lic.token.ExpiresIn to number:%v", err)
-		return false
-	}
-	// check with a buffer
-	// expiresInInt is in seconds, so convert to millis
-	if lic.tokenAcquiredAt+(expiresInInt*1000) > time.Now().UnixMilli()+2000 {
-		return true
-	}
-	return false
-}
-
-func (lic *LinkedInClient) checkAndRefresh() error {
-	if lic.shouldRefresh() {
-		return lic.Authenticate()
-	}
-	return nil
 }

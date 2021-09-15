@@ -11,10 +11,6 @@ const REST_LOOKUP_ORGANIZATION_BY_VANITY_NAME = "https://api.linkedin.com/v2/org
 func (lic *LinkedInClient) LookUpOrganizationByOrgId(orgId int) (Organization, error) {
 	lic.logger.Debugf("LinkedInClient LookUpOrganizationByOrgId called")
 	retval := Organization{}
-	err := lic.checkAndRefresh()
-	if err != nil {
-		return retval, err
-	}
 	apiUrl := fmt.Sprintf(REST_LOOKUP_ORGANIZATION_BY_ID, orgId)
 	req, err := http.NewRequest(GET, apiUrl, nil)
 	if err != nil {
@@ -30,10 +26,6 @@ func (lic *LinkedInClient) LookUpOrganizationByOrgId(orgId int) (Organization, e
 func (lic *LinkedInClient) LookUpOrganizationByVanityName(vanityName string) (Organization, error) {
 	lic.logger.Debugf("LinkedInClient LookUpOrganizationByVanityName called")
 	retval := Organization{}
-	err := lic.checkAndRefresh()
-	if err != nil {
-		return retval, err
-	}
 	apiUrl := fmt.Sprintf(REST_LOOKUP_ORGANIZATION_BY_VANITY_NAME, vanityName)
 	req, err := http.NewRequest(GET, apiUrl, nil)
 	if err != nil {

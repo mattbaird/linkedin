@@ -26,11 +26,6 @@ const REST_CREATE_CAMPAIGN = "https://api.linkedin.com/v2/adCampaignsV2" //POST
 func (lic *LinkedInClient) CreateCampaign(create CreateCampaignRequest) (Campaign, error) {
 	lic.logger.Debugf("LinkedInClient CreateCampaign called")
 	retval := Campaign{}
-	err := lic.checkAndRefresh()
-	if err != nil {
-		return retval, err
-	}
-
 	createCampaignJson, err := json.Marshal(create)
 	if err != nil {
 		return retval, err

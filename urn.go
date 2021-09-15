@@ -25,10 +25,6 @@ func (lic *LinkedInClient) ResolveURN(id int, typeOfUrn string) (ResolvedURN, er
 
 func (lic *LinkedInClient) resolveURN(id int, url string) (ResolvedURN, error) {
 	retval := ResolvedURN{}
-	err := lic.checkAndRefresh()
-	if err != nil {
-		return retval, err
-	}
 	apiUrl := fmt.Sprintf(url, id)
 	req, err := http.NewRequest(GET, apiUrl, nil)
 	if err != nil {

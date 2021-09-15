@@ -17,10 +17,6 @@ func (lic *LinkedInClient) CreateAdAccount(currency string, name string, notifie
 	orgId int, accountType string) (string, error) {
 	lic.logger.Debugf("LinkedInClient CreateAdAccount called")
 	adAccountId := ""
-	err := lic.checkAndRefresh()
-	if err != nil {
-		return adAccountId, err
-	}
 	account, err := newAdAccountRequest(currency, name, notifiedOnCampaignOptimization,
 		notifiedOnCreativeApproval, notifiedOnCreativeRejection, notifiedOnEndOfCampaign,
 		orgId, accountType)
@@ -50,10 +46,6 @@ func (lic *LinkedInClient) CreateAdAccount(currency string, name string, notifie
 func (lic *LinkedInClient) FetchAdAccount(accountId string) (FetchAdAccountResponse, error) {
 	lic.logger.Debugf("LinkedInClient CreateAdAccount called")
 	retval := FetchAdAccountResponse{}
-	err := lic.checkAndRefresh()
-	if err != nil {
-		return retval, err
-	}
 	apiUrl := fmt.Sprintf(REST_FETCH_AD_ACCOUNT, accountId)
 	req, err := http.NewRequest(POST, apiUrl, nil)
 	if err != nil {

@@ -32,10 +32,6 @@ func (lic *LinkedInClient) GetAdAnalytics(start time.Time, granularity string,
 	pivot string, campaigns []int) (AdAnalyticsResponse, error) {
 	lic.logger.Debugf("LinkedInClient CreateCampaign called")
 	retval := AdAnalyticsResponse{}
-	err := lic.checkAndRefresh()
-	if err != nil {
-		return retval, err
-	}
 	restUrl := fmt.Sprintf(REST_GET_AD_ANALYTICS, "analytics",
 		start.Month(), start.Day(), start.Year(), granularity, pivot, makeArrayOfCampaignUrns(campaigns))
 	req, err := http.NewRequest(GET, restUrl, nil)
